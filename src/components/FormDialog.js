@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from "react";
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
@@ -9,11 +9,17 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 
 import PersonAdd from '@material-ui/icons/PersonAdd';
 
+export default class extends Component {
 
-export default function FormDialog(props) {
-  const [open, setOpen, errors] = React.useState(false);
+  constructor(props) {
+    super(props);
+    this.state = {
+      open: false,
+      errors: []
+    };
+  }
 
-  let btnStyles = {
+  btnStyles = {
     padding: '5px',
     color: '#000',
     border: '1px solid rgba(74, 74, 74, 0.5)',
@@ -22,53 +28,61 @@ export default function FormDialog(props) {
     left: '12px'
   };
 
-  const handleClickOpen = () => {
-    setOpen(true);
+  handleClickOpen = () => {
+    this.setState({open: true, errors:[]});
   };
 
-  const handleClose = () => {
-    setOpen(false);
+  handleClose = () => {
+    this.setState({open: false});
   };
 
-  const handleCreate = async () => {
-    // let res = await props.onNewUser(
-    //   document.getElementById('name').value, 
-    //   document.getElementById('email').value, 
-    //   document.getElementById('role').value
-    // );
+  handleCreate = async () => {
+    let res;
 
-    let res = await postData('/newUser', {
-      name: document.getElementById('name').value, 
-      email: document.getElementById('email').value, 
-      role: document.getElementById('role').value
-    });
+    try{
+      res = await postData('/newUser', {
+        name: document.getElementById('name').value, 
+        email: document.getElementById('email').value, 
+        role: document.getElementById('role').value
+      });
+    }catch(err){
+      res = err;
+    }
 
-    if(!res.success) console.log('ER')
-    //useState({errors: '22ss'});
-    console.log(errors)
-
-    // .then(res => {
-    //   console.log(res)
-    //  
-    // })
-
-
-    //handleClose();
+    if(Array.isArray(res)){
+      // Validation errors
+      this.setState({errors: 
+        <ul>
+          {res.map(e => 
+            <li key={e.key} > {e.key + '-> ' + e.msg } </li>
+          )}
+        </ul>
+      });
+    }else if(!res.success){
+      // Server error
+      this.setState({errors: res });
+    }else{
+      // Success
+      document.getElementById('name').value = '';
+      document.getElementById('email').value = '';
+      document.getElementById('role').value = '';
+      this.setState({errors: <span style={{color:'forestgreen'}}>User added!</span> });
+    }
   };
 
-  return (
-    <div>
-      <Button style={btnStyles} id="newUserBtn" variant="outlined" color="primary" onClick={handleClickOpen}>
+  render() {
+    return ( <div>
+      <Button style={this.btnStyles} id="newUserBtn" variant="outlined" color="primary" onClick={this.handleClickOpen}>
         <PersonAdd />
       </Button>
       
-      <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+      <Dialog open={this.state.open} onClose={this.handleClose} aria-labelledby="form-dialog-title">
         <DialogTitle id="form-dialog-title">Add a new user</DialogTitle>
         <DialogContent>
           <DialogContentText>
             Insert name, email and role.
           </DialogContentText>
-          <span>{errors}</span>
+          <span style={{color:'maroon'}}>{this.state.errors}</span>
           <TextField
             autoFocus
             margin="dense"
@@ -93,33 +107,25 @@ export default function FormDialog(props) {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="primary">
+          <Button onClick={this.handleClose} color="primary">
             Cancel
           </Button>
-          <Button onClick={handleCreate} color="primary">
+          <Button onClick={this.handleCreate} color="primary">
             Add new User
           </Button>
         </DialogActions>
       </Dialog>
-    </div>
-  );
+    </div> );
+  };
 }
 
 
 async function postData(url = '', data = {}) {
-  // Default options are marked with *
   const response = await fetch(url, {
-    method: 'POST', // *GET, POST, PUT, DELETE, etc.
-    // mode: 'cors', // no-cors, *cors, same-origin
-    // cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-    // credentials: 'same-origin', // include, *same-origin, omit
-    headers: {
-      'Content-Type': 'application/json'
-      // 'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    //redirect: 'follow', // manual, *follow, error
-    //referrer: 'no-referrer', // no-referrer, *client
-    body: JSON.stringify(data) // body data type must match "Content-Type" header
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
   });
-  return await response.json(); // parses JSON response into native JavaScript objects
+  if(response.status === 200) return await response.json();
+  throw await response.text();
 }
