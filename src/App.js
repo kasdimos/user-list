@@ -3,35 +3,16 @@ import './App.css';
 
 import UserTable from './components/UserTable';
 import FormDialog from './components/FormDialog';
-//import { resolve } from 'dns';
-
-
 
 
 class App extends Component {
-  state = {
-    users: [
-      {
-        signupDate: new Date("2015-03-25"), signup: new Date(),
-        lastLoginDate: new Date("2015-03-25"), lastLogin: new Date(),
-        name: 'John', email: 'john@gmail.com', role: 'admin', status: 'active'
-        //birthCity: 63 
-      }
-      // {
-      //   signupDate: new Date("2015-03-25"), signup: new Date(),
-      //   lastLoginDate: new Date("2015-03-25"), lastLogin: new Date(),
-      //   name: 'Helen', email: 'helen@gmail.com', role: 'user', status: 'inactive'
-      //   //birthCity: 63 
-      // },
-      // {
-      //   signupDate: new Date("2015-03-25"), signup: new Date(),
-      //   lastLoginDate: new Date("2015-03-25"), lastLogin: new Date(),
-      //   name: 'Kathy', email: 'helen@gmail.com', role: 'user', status: 'inactive'
-      //   //birthCity: 63 
-      // }
-
-    ]
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      users: []
+    };
+    this.getUsers();
+  }
 
   getUsers = () => {
     fetch('/users')
@@ -39,7 +20,7 @@ class App extends Component {
     .then(users => {
       users = users.map(user => {
         user.signup = new Date(user.signup);
-        user.lastLogin = new Date(user.lastLogin);
+        user.lastLogin = (user.lastLogin===null) ? '-' : new Date(user.lastLogin);
         return user;
       });
       this.setState({users})
@@ -47,14 +28,7 @@ class App extends Component {
     .catch(err=>console.log(err));
   };
 
-
-
-  createNewUser = async (name, email, role) => {
-    //console.log(name, email, role)
-    
-    //return await postData('/newUser', {name, email, role});
-
-
+  onNewUserCreated = async () => {
     this.getUsers();
   };
 
@@ -63,7 +37,7 @@ class App extends Component {
       <React.Fragment>
         
         <UserTable users={ this.state.users }/>
-        <FormDialog onNewUser = {this.createNewUser}/>
+        <FormDialog onNewUserCreated = {this.onNewUserCreated}/>
         
       </React.Fragment>
     );

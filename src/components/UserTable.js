@@ -24,44 +24,20 @@ const tableIcons = {
 
 
 export default ({ users }) => {
-
-
-  // const [state] = React.useState({
-  //   columns: [
-  //     { title: 'SignUp Date', field: 'signup', type: 'date'},
-  //     { title: 'Last Login', field: 'lastLogin', type: 'datetime'},
-  //     { title: 'Name', field: 'name' },
-  //     {
-  //       title: 'Email', field: 'email'
-  //       //customSort: (a, b) => a.name.length - b.name.length
-  //     },
-  //     { title: 'Role', field: 'role' },
-  //     { title: 'Status', field: 'status' }
-  //   ],
-  //   data: users
-  // });
-
-  
+ 
   const columns = [
         { title: 'SignUp Date', field: 'signup', type: 'date'},
         { title: 'Last Login', field: 'lastLogin', type: 'datetime'},
         { title: 'Name', field: 'name' },
-        {
-          title: 'Email', field: 'email'
-          //customSort: (a, b) => a.name.length - b.name.length
-        },
+        { title: 'Email', field: 'email' },
         { title: 'Role', field: 'role' },
         { title: 'Status', field: 'status' }
       ];
-
-  
 
   return (
     <MaterialTable
       title= "User's table"
       icons={tableIcons}
-      // columns={state.columns}
-      // data={state.data}
       columns={columns}
       data={users}
 

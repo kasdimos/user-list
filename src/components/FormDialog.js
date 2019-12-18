@@ -67,6 +67,7 @@ export default class extends Component {
       document.getElementById('email').value = '';
       document.getElementById('role').value = '';
       this.setState({errors: <span style={{color:'forestgreen'}}>User added!</span> });
+      this.props.onNewUserCreated();
     }
   };
 
